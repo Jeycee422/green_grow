@@ -3,6 +3,7 @@
     <style name="Base.Theme.Green_grow" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:statusBarColor">@color/green</item>
     </style>
 
     <style name="Theme.Green_grow" parent="Base.Theme.Green_grow" />
