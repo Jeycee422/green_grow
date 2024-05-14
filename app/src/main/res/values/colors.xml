@@ -5,4 +5,11 @@
     <color name="green">#10683a</color>
     <color name="stone_100">#f5f5f4</color>
     <color name="gray_600">#4b5563</color>
+    <color name="message_green">#4ade80</color>
+    <color name="message_lightGreen">#dcfce7</color>
+    <color name="message_lightRed">#fee2e2</color>
+    <color name="message_red">#f87171</color>
+    <color name="message_gray">#9ca3af</color>
+    <color name="message_lightGray">#f3f4f6</color>
+
 </resources>

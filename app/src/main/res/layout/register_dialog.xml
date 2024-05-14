@@ -8,7 +8,7 @@
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/editTextText2"
+        android:id="@+id/reg_email"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="42dp"
@@ -16,7 +16,7 @@
         android:layout_marginEnd="42dp"
         android:background="@drawable/edit_text_bg"
         android:ems="10"
-        android:hint="Username / e-mail"
+        android:hint="E-mail"
         android:inputType="text"
         android:padding="14dp"
         android:paddingStart="20dp"
@@ -47,10 +47,10 @@
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextText2" />
+        app:layout_constraintTop_toBottomOf="@+id/reg_email" />
 
     <TextView
-        android:id="@+id/textView3"
+        android:id="@+id/reg_btn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="42dp"
