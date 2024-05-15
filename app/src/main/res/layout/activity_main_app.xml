@@ -64,6 +64,7 @@
                 android:id="@+id/textView3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="15dp"
                 android:text="Department of Agriculture Articles"
                 android:textColor="@color/gray_600"
                 android:textSize="20sp"
@@ -72,7 +73,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 android:elevation="0dp"
                 app:cardBackgroundColor="@null"
@@ -175,7 +176,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
@@ -265,7 +266,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
@@ -356,7 +357,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
@@ -447,7 +448,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"
@@ -538,7 +539,7 @@
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="250dp"
-                android:layout_marginTop="10dp"
+                android:layout_marginBottom="15dp"
                 android:background="@color/white"
                 app:cardCornerRadius="10dp"
                 app:cardElevation="0dp"

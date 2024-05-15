@@ -90,4 +90,8 @@ public class main_app extends AppCompatActivity {
                     .putExtra("title","Restore some NFA functions in RTL extension, DA urges Congress"));
         });
     }
+    @Override
+    public void onBackPressed() {
+        // Do nothing (disable back button)
+    }
 }

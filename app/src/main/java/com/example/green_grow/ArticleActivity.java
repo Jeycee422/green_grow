@@ -8,11 +8,13 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -90,23 +92,47 @@ public class ArticleActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             LinearLayout linearLayout = findViewById(R.id.comment_section);
+//                            LinearLayout replyLinear = findViewById(R.id.reply_section);
 
                             for (JsonElement comment : jsonResponse.getAsJsonArray("data")) {
                                 JsonObject commentObject = comment.getAsJsonObject();
                                 JsonObject userObject = commentObject.getAsJsonObject("user");
+                                JsonArray conversationArray = commentObject.getAsJsonArray("conversation");
 
-                                // Inflate the layout component
                                 View userItemView = getLayoutInflater().inflate(R.layout.comment_layout, null);
-
-                                // Find and set data to views in the inflated layout component
                                 TextView textComment = userItemView.findViewById(R.id.comment_text);
                                 TextView textEmail = userItemView.findViewById(R.id.user_email);
                                 textComment.setText(commentObject.get("comment").getAsString());
                                 String fullName = userObject.get("first_name").getAsString() + " " + userObject.get("last_name").getAsString();
                                 textEmail.setText(fullName);
-
-                                // Add the inflated layout component to the LinearLayout
                                 linearLayout.addView(userItemView);
+
+                                // Check if there are conversations/replies
+                                if (conversationArray != null && conversationArray.size() > 0) {
+                                    for (JsonElement reply : conversationArray) {
+                                        JsonObject replyObject = reply.getAsJsonObject();
+                                        JsonObject replyUserObject = replyObject.getAsJsonObject("user");
+
+                                        // Inflate a new instance of comment_layout for each reply
+                                        View replyView = getLayoutInflater().inflate(R.layout.comment_layout, null);
+                                        TextView textReply = replyView.findViewById(R.id.comment_text);
+                                        TextView textUserReply = replyView.findViewById(R.id.user_email);
+                                        textReply.setText(replyObject.get("reply").getAsString());
+                                        String fullUserReplyName = replyUserObject.get("first_name").getAsString() + " " + replyUserObject.get("last_name").getAsString();
+                                        textUserReply.setText(fullUserReplyName);
+
+                                        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) replyView.getLayoutParams();
+
+                                        if (params == null) {
+                                            params = new ViewGroup.MarginLayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                        }
+                                        int marginStartPx = getResources().getDimensionPixelSize(R.dimen.replyDimen);
+                                        params.setMarginStart(marginStartPx);
+
+                                        replyView.setLayoutParams(params);
+                                        linearLayout.addView(replyView);
+                                    }
+                                }
                             }
                         }
                     });

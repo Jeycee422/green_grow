@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity {
                                     public void run() {
                                         Intent intent = new Intent(MainActivity.this, main_app.class).putExtra("email",userName).putExtra("token",jsonResponse.get("data").toString());
                                         startActivity(intent);
+                                        finish();
                                     }
                                 };
 
