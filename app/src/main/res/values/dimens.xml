@@ -3,4 +3,5 @@
     <dimen name="dialog_horizontal_margin">24dp</dimen>
     <dimen name="dialog_vertical_margin">24dp</dimen>
     <dimen name="replyDimen">40dp</dimen>
+    <dimen name="articleDimen">15dp</dimen>
 </resources>

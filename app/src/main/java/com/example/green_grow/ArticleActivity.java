@@ -2,10 +2,15 @@ package com.example.green_grow;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ActivityManager;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.speech.tts.TextToSpeech;
+import android.text.Html;
+import android.text.Spanned;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +22,8 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.squareup.picasso.LruCache;
+import com.squareup.picasso.Picasso;
 
 import org.w3c.dom.Text;
 
@@ -26,19 +33,31 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Locale;
 
 public class ArticleActivity extends AppCompatActivity {
 
+    TextToSpeech textToSpeech;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_article);
+
+        textToSpeech = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                if(i != TextToSpeech.ERROR) {
+                    textToSpeech.setLanguage(Locale.US);
+                }
+            }
+        });
 
         Intent articleIntent = getIntent();
         String imageSrc = articleIntent.getStringExtra("image");
         String tokenStr = articleIntent.getStringExtra("token");
         String dateStr = articleIntent.getStringExtra("date");
         String bodyStr = articleIntent.getStringExtra("heading");
+        Spanned bodySpanned = Html.fromHtml(bodyStr);
         String titleStr = articleIntent.getStringExtra("title");
         String articleSlug = articleIntent.getStringExtra("slug");
 
@@ -49,12 +68,20 @@ public class ArticleActivity extends AppCompatActivity {
         TextView articleDate = findViewById(R.id.article_date);
         TextView articleBody = findViewById(R.id.article_articleBody);
 
+        articleBody.setOnClickListener(v -> {
+            textToSpeech.speak(bodySpanned.toString(),TextToSpeech.QUEUE_FLUSH,null,null);
+        });
+
         articleTitle.setText(titleStr);
-        int resourceId = getResources().getIdentifier(imageSrc,"drawable",getPackageName());
-        articleImage.setImageResource(resourceId);
+
+        Picasso.Builder builder = new Picasso.Builder(getApplicationContext());
+        builder.memoryCache(new LruCache((getMemo() * 20) / 100)); // Set the cache size in bytes
+        Picasso picasso = builder.build();
+        picasso.setIndicatorsEnabled(true); // For debugging
+        picasso.load(imageSrc).resize(800, 600).into(articleImage);
 
         articleDate.setText(dateStr);
-        articleBody.setText(bodyStr);
+        articleBody.setText(bodySpanned);
 
         new Thread(new Runnable() {
             @Override
@@ -64,7 +91,7 @@ public class ArticleActivity extends AppCompatActivity {
 
                     HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                    conn.setRequestProperty("Authorization", "eyJhbGciOiJIUzI1NiJ9.eyJfaWQiOiI2NjNmOTYxZjk5NDZjOTI2ZTAxZDU2ODgiLCJmaXJzdF9uYW1lIjoiSm9obiIsImxhc3RfbmFtZSI6IkRvZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwicGFzc3dvcmQiOiIkMmIkMTAkSzcuY1YvRjMuN05wazRyOEI5TllKT3VwNFJUdkZwalRCRnZNdDU5RmtiLzBMRmk2cTdIS0siLCJjcmVhdGVkQXQiOiIyMDI0LTA1LTExVDE2OjAwOjMxLjYzOFoiLCJ1cGRhdGVkQXQiOiIyMDI0LTA1LTExVDE2OjAwOjMxLjYzOFoiLCJfX3YiOjB9.JwFWOnHrjbh2kexB9Dc76o7LjkVZ1ZZwv5sn2Iztur8");
+                    conn.setRequestProperty("Authorization", tokenStr.trim());
                     conn.setRequestMethod("GET");
 
                     conn.setRequestProperty("Content-Type", "application/json");
@@ -143,5 +170,23 @@ public class ArticleActivity extends AppCompatActivity {
             }
         }).start();
 
+    }
+
+    private int getMemo() {
+        ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo memoryInfo = new ActivityManager.MemoryInfo();
+        activityManager.getMemoryInfo(memoryInfo);
+
+//        long totalMemory = memoryInfo.totalMem / (1024 * 1024); // Convert bytes to MB
+        int memoryClass = activityManager.getMemoryClass();
+        return memoryClass;
+    }
+
+    @Override
+    protected void onPause() {
+        if(textToSpeech != null) {
+            textToSpeech.stop();
+        }
+        super.onPause();
     }
 }

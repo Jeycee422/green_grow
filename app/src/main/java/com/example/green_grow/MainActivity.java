@@ -35,12 +35,16 @@ import java.nio.charset.StandardCharsets;
 public class MainActivity extends AppCompatActivity {
 
     TextView messageBox;
+    TextView regMessageBox;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         messageBox = findViewById(R.id.message_box);
+
+
+
         if(!NetworkUtils.isNetworkAvailable(this)){
             messageBox.setText("Please check your internet connection.");
             messageBox.setTextColor(getResources().getColor(R.color.message_gray));
@@ -50,12 +54,15 @@ public class MainActivity extends AppCompatActivity {
 
         Dialog registerDialog = new Dialog(this);
         registerDialog.setContentView(R.layout.register_dialog);
+        regMessageBox = registerDialog.findViewById(R.id.reg_message_box);
 
-        EditText username = findViewById(R.id.log_username);
-        EditText password = findViewById(R.id.log_pass);
+        final EditText username = findViewById(R.id.log_username);
+        final EditText password = findViewById(R.id.log_pass);
 
-        EditText regUsername = registerDialog.findViewById(R.id.reg_email);
-        EditText regPassword = registerDialog.findViewById(R.id.reg_pass);
+        final EditText regUsername = registerDialog.findViewById(R.id.reg_email);
+        final EditText regPassword = registerDialog.findViewById(R.id.reg_pass);
+        final EditText regFName = registerDialog.findViewById(R.id.reg_firstName);
+        final EditText regLName = registerDialog.findViewById(R.id.reg_lastName);
 
 
         Window window = registerDialog.getWindow();
@@ -106,8 +113,12 @@ public class MainActivity extends AppCompatActivity {
         TextView loginBtn = findViewById(R.id.login_btn);
         loginBtn.setOnClickListener(v -> {
 
+            messageBox.setText("Loading...");
+            messageBox.setTextColor(getResources().getColor(R.color.message_green));
+            messageBox.setBackground(getResources().getDrawable(R.drawable.message_green));
             String userName = username.getText().toString();
             String userPass = password.getText().toString();
+
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -193,67 +204,90 @@ public class MainActivity extends AppCompatActivity {
 
         TextView registerBtn = registerDialog.findViewById(R.id.reg_btn);
         registerBtn.setOnClickListener(v -> {
+
             String userName = regUsername.getText().toString();
             String userPass = regPassword.getText().toString();
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        // URL for the sign-in endpoint
-                        URL url = new URL("https://greengrow-mongodb-expressjs.onrender.com/sign-up");
+            String userFName = regFName.getText().toString();
+            String userLName = regLName.getText().toString();
 
-                        // Open a connection
-                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            if (userFName.equals("") || userLName.equals("") || userName.equals("") || userPass.equals("")) {
+                regMessageBox.setText("Please fill all field");
+                regMessageBox.setTextColor(getResources().getColor(R.color.message_red));
+                regMessageBox.setBackground(getResources().getDrawable(R.drawable.message_red));
+            }else {
+                regMessageBox.setText("Loading...");
+                regMessageBox.setTextColor(getResources().getColor(R.color.message_green));
+                regMessageBox.setBackground(getResources().getDrawable(R.drawable.message_green));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            // URL for the sign-in endpoint
+                            URL url = new URL("https://greengrow-mongodb-expressjs.onrender.com/sign-up");
 
-                        // Set the request method to POST
-                        conn.setRequestMethod("POST");
+                            // Open a connection
+                            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                        // Set request headers
-                        conn.setRequestProperty("Content-Type", "application/json");
-                        conn.setRequestProperty("Accept", "application/json");
+                            // Set the request method to POST
+                            conn.setRequestMethod("POST");
 
-                        // Create JSON data for the sign-in request using template string
-                        String requestData = String.format("{\"email\": \"%s\", \"password\": \"%s\"}", userName, userPass);
+                            // Set request headers
+                            conn.setRequestProperty("Content-Type", "application/json");
+                            conn.setRequestProperty("Accept", "application/json");
 
-                        // Enable output and send JSON data
-                        conn.setDoOutput(true);
-                        try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
-                            byte[] data = requestData.getBytes(StandardCharsets.UTF_8);
-                            wr.write(data);
-                        }
+                            // Create JSON data for the sign-in request using template string
+                            String requestData = String.format("{\"email\": \"%s\", \"password\": \"%s\", \"first_name\": \"%s\", \"last_name\": \"%s\"}", userName, userPass, userFName, userLName);
 
-                        // Get the response code
-                        int responseCode = conn.getResponseCode();
-                        Log.d("Response Code: " ,String.valueOf(responseCode));
-
-                        // Read the response
-                        String inputLine;
-                        StringBuilder response = new StringBuilder();
-                        try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-
-                            while ((inputLine = in.readLine()) != null) {
-                                response.append(inputLine);
+                            // Enable output and send JSON data
+                            conn.setDoOutput(true);
+                            try (DataOutputStream wr = new DataOutputStream(conn.getOutputStream())) {
+                                byte[] data = requestData.getBytes(StandardCharsets.UTF_8);
+                                wr.write(data);
                             }
-                            Log.d("Response: ", response.toString());
+
+                            // Get the response code
+                            int responseCode = conn.getResponseCode();
+                            Log.d("Response Code: " ,String.valueOf(responseCode));
+
+                            // Read the response
+                            String inputLine;
+                            StringBuilder response = new StringBuilder();
+                            try (BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
+
+                                while ((inputLine = in.readLine()) != null) {
+                                    response.append(inputLine);
+                                }
+                                Log.d("Response: ", response.toString());
+                            }
+
+                            // Close the connection
+                            conn.disconnect();
+                            regFName.setText("");
+                            regLName.setText("");
+                            regUsername.setText("");
+                            regPassword.setText("");
+                            regMessageBox.setText("");
+                            regMessageBox.setVisibility(View.INVISIBLE);
+
+                            Gson gson = new Gson();
+                            JsonObject jsonResponse = gson.fromJson(response.toString(), JsonObject.class);
+
+                            // Access JSON fields
+                            String accessToken = jsonResponse.get("status").getAsString();
+                            runOnUiThread(() -> {
+                                if(accessToken.toLowerCase().equals("success")) {
+                                    Toast.makeText(MainActivity.this, accessToken, Toast.LENGTH_SHORT).show();
+                                    registerDialog.dismiss();
+                                    closeKeyboard(registerDialog.getCurrentFocus());
+                                }
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-
-                        // Close the connection
-                        conn.disconnect();
-
-                        Gson gson = new Gson();
-                        JsonObject jsonResponse = gson.fromJson(response.toString(), JsonObject.class);
-
-                        // Access JSON fields
-                        String accessToken = jsonResponse.get("status").getAsString();
-                        runOnUiThread(() -> {
-                            closeKeyboard(registerDialog.getCurrentFocus());
-                            Toast.makeText(MainActivity.this, accessToken.getClass().toString(), Toast.LENGTH_SHORT).show();
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
-                }
-            }).start();
+                }).start();
+            }
+
         });
 
 
